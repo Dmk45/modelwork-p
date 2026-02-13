@@ -1,3 +1,4 @@
+import struct
 import torch
 import torch.nn as nn
 
@@ -15,18 +16,38 @@ class LSTMModel(nn.Module):
             rnn = nn.RNN(input_size, hidden_size, num_layers, batch_first=True)
         elif type == 'linear':
             lin = nn.Linear(input_size, hidden_size)
-
-    def forward(self, x, struct: list[dict[str, dict[str, list | int]]], num, input_size=1, hidden_size=50, num_layers=2, output_size=1):
-        self.hidden_size = hidden_size
-        self.num_layers = num_layers
+        else:
+            raise ValueError(f"Unsupported layer type: {type}")
+    def create(self, x, struct: list[dict]):
+        self.validate_struct(struct, expected_input_size=x.size(-1))
+        layers = []
         for layer in struct:
-            for i in range(layer['sequence']['layer_num']):
-                self.layer_maker(type=layer['sequence']['type'][i], input_size=input_size, hidden_size=hidden_size, num_layers=num_layers, output_size=output_size)
+            layers.append(self.layer_maker(type=layer["type"], input_size=layer["input_size"], hidden_size=layer.get("hidden_size"), num_layers=layer.get("num_layers")))
+        return struct, layers
+    def validate_struct(self, struct: list[dict], expected_input_size: int):
+        prev_output_size = expected_input_size
 
-        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(x.device)
-        c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(x.device)
+        for i, layer in enumerate(struct):
+            required = {"type", "input_size", "output_size"}
+            missing = required - layer.keys()
+            if missing:
+                raise ValueError(f"Layer {i} missing keys: {missing}")
 
-        out, _ = self.lstm(x, (h0, c0))
-        out = self.fc(out[:, -1, :])
-        return out
+            if layer["input_size"] != prev_output_size:
+                raise ValueError(
+                    f"Layer {i} input_size {layer['input_size']} "
+                    f"does not match previous output_size {prev_output_size}"
+                )
+
+            if layer["type"] in {"LSTM", "GRU", "RNN"}:
+                if "hidden_size" not in layer or "num_layers" not in layer:
+                    raise ValueError(f"Layer {i} missing hidden_size or num_layers")
+
+                if layer["output_size"] != layer["hidden_size"]:
+                    raise ValueError(
+                        f"Layer {i} output_size must equal hidden_size for RNN layers"
+                    )
+
+            prev_output_size = layer["output_size"]
+
 

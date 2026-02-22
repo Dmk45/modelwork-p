@@ -1,8 +1,4 @@
-import yfinance as yf
-import pandas as pd
-import numpy as np
-from datetime import datetime, timedelta
-import torch
+
 
 
 import yfinance as yf
@@ -116,7 +112,7 @@ class StockDataManager:
         all_y = []
         
         for symbol, df in self.raw_data.items():
-            # Extract OHLCV features
+            # Extract OHLCV features 
             open_prices = df['Open'].values
             high_prices = df['High'].values
             low_prices = df['Low'].values

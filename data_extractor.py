@@ -1,6 +1,3 @@
-
-
-
 import yfinance as yf
 import pandas as pd
 import numpy as np
@@ -224,40 +221,6 @@ class StockDataManager:
         
         print(f"\nData saved to {filepath}")
     
-    def load_data(self, filename: str = 'stock_data.pkl'):
-        """
-        Load previously saved data.
-        
-        Args:
-            filename: Name of file to load (from save_dir)
-        
-        Returns:
-            X, y: Loaded data ready for model training
-        """
-        filepath = os.path.join(self.save_dir, filename)
-        
-        if not os.path.exists(filepath):
-            raise FileNotFoundError(f"Data file not found: {filepath}")
-        
-        with open(filepath, 'rb') as f:
-            data_dict = pickle.load(f)
-        
-        self.X = data_dict['X']
-        self.y = data_dict['y']
-        self.symbols = data_dict['symbols']
-        self.raw_data = data_dict['raw_data']
-        self.mean_X = data_dict['mean_X']
-        self.std_X = data_dict['std_X']
-        self.mean_y = data_dict['mean_y']
-        self.std_y = data_dict['mean_y']
-        
-        print(f"Data loaded from {filepath}")
-        print(f"Symbols: {self.symbols}")
-        print(f"X shape: {self.X.shape}")
-        print(f"y shape: {self.y.shape}")
-        
-        return self.X, self.y
-    
     def get_normalization_params(self) -> dict:
         """
         Get normalization parameters (needed for predictions).
@@ -334,5 +297,3 @@ class StockDataManager:
         print("=" * 70)
         
         return result
-
-

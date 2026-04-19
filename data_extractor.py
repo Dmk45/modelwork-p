@@ -271,6 +271,8 @@ class StockDataManager:
         # Normalize
         if normalize:
             X, y = self.normalize_data(X, y)
+            self.X = X
+            self.y = y
         
         # Split
         X_train, X_test, y_train, y_test = self.split_data(X, y, train_ratio)

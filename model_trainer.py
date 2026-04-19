@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import os
-from typing import List, Tuple, Optional, dict
+from typing import List, Tuple, Optional
 
 
 class LSTMModel(nn.Module):
